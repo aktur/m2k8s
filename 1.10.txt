@@ -1,0 +1,103 @@
+-> % http POST localhost:8080/profile username=unamerkel password=changeme \
+    firstName=Una lastName=Merkel email=unamerkel@example.com
+HTTP/1.1 500 
+Connection: close
+Content-Type: application/json
+Date: Sat, 30 May 2020 12:56:21 GMT
+Transfer-Encoding: chunked
+
+{
+    "error": "Internal Server Error",
+    "message": "could not execute statement; nested exception is org.hibernate.exception.GenericJDBCException: could not execute statement",
+    "path": "/profile",
+    "status": 500,
+    "timestamp": "2020-05-30T12:56:21.648+0000"
+}
+
+-> % http localhost:8080/profile/unamerkel
+HTTP/1.1 404 
+Connection: keep-alive
+Content-Length: 0
+Date: Sat, 30 May 2020 12:57:29 GMT
+Keep-Alive: timeout=60
+
+-> % http localhost:8080/profile/michal   
+HTTP/1.1 200 
+Connection: keep-alive
+Content-Type: application/json
+Date: Sat, 30 May 2020 12:57:56 GMT
+Keep-Alive: timeout=60
+Transfer-Encoding: chunked
+
+{
+    "email": "mrutka@mqlservice.net",
+    "firstName": "",
+    "id": 1,
+    "imageFileContentType": null,
+    "imageFileName": null,
+    "lastName": "",
+    "password": "secret",
+    "username": "michal"
+}
+
+-> % http localhost:8080/profile/russcolombo
+HTTP/1.1 404 
+Connection: keep-alive
+Content-Length: 0
+Date: Sat, 30 May 2020 12:58:26 GMT
+Keep-Alive: timeout=60
+
+
+-> % http -f POST http://localhost:8080/profile/unamerkel/image file@una_merkel.jpg
+HTTP/1.1 500 
+Connection: close
+Content-Type: application/json
+Date: Sat, 30 May 2020 12:58:48 GMT
+Transfer-Encoding: chunked
+
+{
+    "error": "Internal Server Error",
+    "message": "No message available",
+    "path": "/profile/unamerkel/image",
+    "status": 500,
+    "timestamp": "2020-05-30T12:58:48.772+0000"
+}
+
+-> % http -f POST http://localhost:8080/profile/michal/image file@una_merkel.jpg
+HTTP/1.1 500 
+Connection: close
+Content-Type: application/json
+Date: Sat, 30 May 2020 12:59:10 GMT
+Transfer-Encoding: chunked
+
+{
+    "error": "Internal Server Error",
+    "message": "Could not commit JPA transaction; nested exception is javax.persistence.RollbackException: Error while committing the transaction",
+    "path": "/profile/michal/image",
+    "status": 500,
+    "timestamp": "2020-05-30T12:59:10.467+0000"
+}
+
+-> % http localhost:8080/profile/unamerkel/image
+HTTP/1.1 400 
+Connection: close
+Content-Length: 81
+Content-Type: image/jpeg;charset=UTF-8
+Date: Sat, 30 May 2020 12:59:40 GMT
+
+Error: class path resource [ghost.jpg] cannot be opened because it does not exist
+
+-> % http localhost:8080/profile/michal/image       
+HTTP/1.1 200 
+Connection: keep-alive
+Content-Length: 64888
+Content-Type: image/jpeg
+Date: Sat, 30 May 2020 13:02:48 GMT
+Keep-Alive: timeout=60
+
+
+
++-----------------------------------------+
+| NOTE: binary data not shown in terminal |
++-----------------------------------------+
+
