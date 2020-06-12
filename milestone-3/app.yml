@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: profile-storage
+  namespace: m2k8s
+  labels:
+    app: profile
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: profile-app
+  namespace: m2k8s
+  labels:
+    app: profile
+spec:
+  ports:
+    - port: 8080
+      targetPort: 80
+  selector:
+    app: profile
+    tier: service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: profile
+  namespace: m2k8s
+  labels:
+    app: profile
+spec:
+  selector:
+    matchLabels:
+      app: profile
+      tier: service
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: profile
+        tier: service
+    spec:
+      containers:
+      - image: aktur/m2k8s:latest
+        name: profile
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:mysql://db:3306/profiles
+        - name: SPRING_DATASOURCE_USERNAME
+          value: empuser
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: password
+        ports:
+        - containerPort: 8080
+          name: profile
+        volumeMounts:
+        - name: profile-data
+          mountPath: /data
+      volumes:
+      - name: profile-data
+        persistentVolumeClaim:
+          claimName: profile-storage
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: profile
+  namespace: m2k8s
+spec:
+  maxReplicas: 5
+  minReplicas: 2
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: profile
+  targetCPUUtilizationPercentage: 80
