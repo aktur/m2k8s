@@ -15,12 +15,12 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: root
+  name: dbroot
   namespace: m2k8s
 type: Opaque
 data:
-  username: LW4gYWRtaW4K
-  password: LW4gc2VjcmV0Cg==
+  username: YWRtaW4=
+  password: c2VjcmV0
 ---
 apiVersion: v1
 kind: Secret
@@ -29,8 +29,8 @@ metadata:
   namespace: m2k8s
 type: Opaque
 data:
-  username: LW4gZW1wdXNlcgo=
-  password: LW4gcGFzc3dvcmQK
+  username: ZW1wdXNlcg==
+  password: cGFzc3dvcmQ=
 ---
 apiVersion: v1
 kind: Service
@@ -69,11 +69,20 @@ spec:
         name: mysql
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: secret
+          valueFrom:
+            secretKeyRef:
+              name: dbroot
+              key: password
         - name: MYSQL_USER
-          value: empuser
+          valueFrom:
+            secretKeyRef:
+              name: empuser
+              key: username
         - name: MYSQL_PASSWORD
-          value: password
+          valueFrom:
+            secretKeyRef:
+              name: empuser
+              key: password
         - name: MYSQL_DATABASE
           value: profiles
         ports:
@@ -86,4 +95,3 @@ spec:
       - name: mysql-persistent-storage
         persistentVolumeClaim:
           claimName: mysql-storage
-

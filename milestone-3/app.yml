@@ -54,9 +54,15 @@ spec:
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://db:3306/profiles
         - name: SPRING_DATASOURCE_USERNAME
-          value: empuser
+          valueFrom:
+            secretKeyRef:
+              name: empuser
+              key: username
         - name: SPRING_DATASOURCE_PASSWORD
-          value: password
+          valueFrom:
+            secretKeyRef:
+              name: empuser
+              key: password
         ports:
         - containerPort: 8080
           name: profile
@@ -74,8 +80,8 @@ metadata:
   name: profile
   namespace: m2k8s
 spec:
-  maxReplicas: 5
-  minReplicas: 2
+  maxReplicas: 2
+  minReplicas: 1
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
